@@ -1,0 +1,20 @@
+# TrueCombat French localization. MiniMessage and HEX colors are supported.
+combat:
+  entered: '<#5C82FF>Vous etes maintenant en combat JcJ.'
+  expired: '<#5C82FF>Vous n etes plus en combat JcJ.'
+combat-log:
+  broadcast: '<#5C82FF><bold>JcJ</bold> <#FFFFFF><player> s est deconnecte pendant un combat et a ete puni.'
+  rejoin-message: '<red>Vous vous etes deconnecte pendant un combat JcJ et avez ete puni.</red>'
+totems:
+  limit-reached: '<red>Limite de totems : <maximum>.</red>'
+ender-pearl:
+  disabled: '<red>Les perles de l Ender sont desactivees sur ce serveur</red>'
+wind-charge:
+  disabled: '<red>Les charges de vent sont desactivees sur ce serveur</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>Trident <#FFFFFF><time> s'
+  pvp: '<#5C82FF>JcJ <#FFFFFF><time> s'
+  mace: '<#5C82FF>Masse <#FFFFFF><time> s'
+  wind-charge: '<#5C82FF>Charge de vent <#FFFFFF><time> s'
+  ender-pearl: '<#5C82FF>Perle de l Ender <#FFFFFF><time> s'

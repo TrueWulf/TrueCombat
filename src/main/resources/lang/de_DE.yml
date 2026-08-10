@@ -1,0 +1,20 @@
+# TrueCombat German localization. MiniMessage and HEX colors are supported.
+combat:
+  entered: '<#5C82FF>Du bist jetzt im PvP-Kampf.'
+  expired: '<#5C82FF>Du bist nicht mehr im PvP-Kampf.'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> hat sich waehrend des Kampfes ausgeloggt und wurde bestraft.'
+  rejoin-message: '<red>Du hast dich waehrend eines PvP-Kampfes ausgeloggt und wurdest bestraft.</red>'
+totems:
+  limit-reached: '<red>Totem-Limit: <maximum>.</red>'
+ender-pearl:
+  disabled: '<red>Enderperlen sind auf diesem Server deaktiviert</red>'
+wind-charge:
+  disabled: '<red>Windladungen sind auf diesem Server deaktiviert</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>Dreizack <#FFFFFF><time> Sek.'
+  pvp: '<#5C82FF>PvP <#FFFFFF><time> Sek.'
+  mace: '<#5C82FF>Streitkolben <#FFFFFF><time> Sek.'
+  wind-charge: '<#5C82FF>Windladung <#FFFFFF><time> Sek.'
+  ender-pearl: '<#5C82FF>Enderperle <#FFFFFF><time> Sek.'

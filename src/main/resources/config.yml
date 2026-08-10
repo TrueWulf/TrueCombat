@@ -1,0 +1,69 @@
+# TrueCombat v2.1.1 | Author: TrueWulf
+# All messages use MiniMessage and are stored in lang/<locale>.yml.
+# Bundled locales: en_US, ru_RU, de_DE, fr_FR, it_IT, es_ES, pt_BR.
+lang: en_US
+
+pvp:
+  # Enables PvP tagging when one player damages another player.
+  enabled: true
+  # Time a player remains in PvP after their last PvP hit.
+  duration-seconds: 30
+  # Refreshes the PvP timer after each valid PvP hit.
+  refresh-on-hit: true
+
+combat-log:
+  enabled: true
+  # Applies only when a tagged player disconnects.
+  force-kill: true
+  drop-inventory: true
+  notify-on-rejoin: true
+  broadcast: true
+  reward-commands:
+    # When enabled, commands are run before the logger's inventory is dropped.
+    # Use your hearts plugin's give command with <logger> so its item drops from
+    # the combat logger. <attacker> is the last PvP attacker, when available.
+    # Example (disabled): 'yourhearts give <logger> heart 1'
+    enabled: false
+    commands: []
+
+totems:
+  enabled: false
+  # Absolute limit in inventory, offhand, and every bundle variant.
+  maximum: 4
+
+# Perk cooldowns are created only after successful use during active PvP.
+trident:
+  enabled: true
+  cooldown-seconds: 20
+  # Applies Riptide cooldown only while the player has an active PvP tag.
+  only-in-combat: true
+
+ender-pearl:
+  # Allows Ender Pearls normally. Set false to prohibit them server-wide.
+  enabled: true
+  # Cooldown after a successful throw during active PvP. Set 0 to disable it.
+  cooldown-seconds: 15
+
+wind-charge:
+  # Allows Wind Charges normally. Set false to prohibit them server-wide.
+  enabled: true
+  # Cooldown after a successful use during active PvP. Set 0 to disable it.
+  cooldown-seconds: 3
+  # Applies cooldown after every successful throw while the player is in PvP.
+  only-in-combat: true
+
+mace:
+  enabled: true
+  # The mace triggers its cooldown from a player hit in PvP. While cooling down,
+  # mace damage is blocked against both players and non-player mobs.
+  cooldown-seconds: 60
+
+actionbar:
+  enabled: true
+  # HUD order is: Ender Pearl, Trident, PvP, Mace, Wind Charge.
+  separator: ' <#888888>|</#888888> '
+  show-ender-pearl: true
+  show-trident: true
+  show-pvp: true
+  show-mace: true
+  show-wind-charge: true

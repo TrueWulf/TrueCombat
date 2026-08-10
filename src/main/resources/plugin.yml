@@ -1,0 +1,16 @@
+name: TrueCombat
+version: 2.1.1
+main: ru.truwlf.truecombat.TrueCombatPlugin
+api-version: '1.21'
+author: TrueWulf
+description: Super lightweight combat-log and PvP cooldown plugin for Paper and Purpur 1.21.x
+commands:
+  truecombat:
+    description: Manage TrueCombat.
+    aliases: [tc]
+    permission: truecombat.admin
+permissions:
+  truecombat.admin:
+    default: op
+  truecombat.bypass:
+    default: false

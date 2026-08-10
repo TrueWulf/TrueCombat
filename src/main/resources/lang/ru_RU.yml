@@ -1,0 +1,20 @@
+# TrueCombat Russian localization. MiniMessage and HEX colors are supported.
+combat:
+  entered: '<#5C82FF>Вы вошли в PvP-режим.'
+  expired: '<#5C82FF>Вы больше не в PvP-режиме.'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> вышел во время боя и был наказан.'
+  rejoin-message: '<red>Вы вышли во время PvP-боя и были наказаны.</red>'
+totems:
+  limit-reached: '<red>Лимит тотемов: <maximum>.</red>'
+ender-pearl:
+  disabled: '<red>Эндер-перлы запрещены на этом сервере</red>'
+wind-charge:
+  disabled: '<red>Винчарджи запрещены на этом сервере</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>Трезубец <#FFFFFF><time> сек'
+  pvp: '<#5C82FF>ПвП <#FFFFFF><time> сек'
+  mace: '<#5C82FF>Булава <#FFFFFF><time> сек'
+  wind-charge: '<#5C82FF>Винчардж <#FFFFFF><time> сек'
+  ender-pearl: '<#5C82FF>Эндер-жемчуг <#FFFFFF><time> сек'

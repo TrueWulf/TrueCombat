@@ -1,0 +1,20 @@
+# TrueCombat Spanish localization. MiniMessage and HEX colors are supported.
+combat:
+  entered: '<#5C82FF>Ahora estas en combate PvP.'
+  expired: '<#5C82FF>Ya no estas en combate PvP.'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> se desconecto durante el combate y fue castigado.'
+  rejoin-message: '<red>Te desconectaste durante un combate PvP y fuiste castigado.</red>'
+totems:
+  limit-reached: '<red>Limite de totems: <maximum>.</red>'
+ender-pearl:
+  disabled: '<red>Las perlas de Ender estan desactivadas en este servidor</red>'
+wind-charge:
+  disabled: '<red>Las cargas de viento estan desactivadas en este servidor</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>Tridente <#FFFFFF><time> s'
+  pvp: '<#5C82FF>PvP <#FFFFFF><time> s'
+  mace: '<#5C82FF>Maza <#FFFFFF><time> s'
+  wind-charge: '<#5C82FF>Carga de viento <#FFFFFF><time> s'
+  ender-pearl: '<#5C82FF>Perla de Ender <#FFFFFF><time> s'

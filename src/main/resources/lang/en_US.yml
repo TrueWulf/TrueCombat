@@ -1,0 +1,20 @@
+# TrueCombat English localization. MiniMessage and HEX colors are supported.
+combat:
+  entered: '<#5C82FF>You are now in PvP combat.'
+  expired: '<#5C82FF>You are no longer in PvP combat.'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> disconnected during combat and was punished.'
+  rejoin-message: '<red>You logged out during PvP combat and were punished.</red>'
+totems:
+  limit-reached: '<red>Totem limit: <maximum>.</red>'
+ender-pearl:
+  disabled: '<red>Ender Pearls are disabled on this server</red>'
+wind-charge:
+  disabled: '<red>Wind Charges are disabled on this server</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>Trident <#FFFFFF><time> sec'
+  pvp: '<#5C82FF>PvP <#FFFFFF><time> sec'
+  mace: '<#5C82FF>Mace <#FFFFFF><time> sec'
+  wind-charge: '<#5C82FF>Wind Charge <#FFFFFF><time> sec'
+  ender-pearl: '<#5C82FF>Ender Pearl <#FFFFFF><time> sec'
