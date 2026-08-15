@@ -2,8 +2,6 @@
 
 # TrueCombat
 
-![TrueCombat icon](TrueCombat-icon.png)
-
 **Fast, lightweight combat protection for Minecraft servers and networks.**
 
 Combat tagging, combat-log punishment, item cooldowns, and PvP controls in one small, configurable plugin for Bukkit-compatible servers.
