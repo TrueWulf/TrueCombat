@@ -1,7 +1,9 @@
 package ru.truwlf.truecombat;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -27,23 +29,26 @@ import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 final class CombatListener implements Listener {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
+    private static final Material MACE = Material.matchMaterial("MACE");
+    private static final Material WIND_CHARGE = Material.matchMaterial("WIND_CHARGE");
+    private static final org.bukkit.entity.EntityType WIND_CHARGE_ENTITY = org.bukkit.entity.EntityType.fromName("WIND_CHARGE");
     private final TrueCombatPlugin plugin;
-    private final Map<UUID, Long> combat = new HashMap<>();
-    private final Map<UUID, Long> trident = new HashMap<>();
-    private final Map<UUID, Long> pearl = new HashMap<>();
-    private final Map<UUID, Long> windCharge = new HashMap<>();
-    private final Map<UUID, Long> mace = new HashMap<>();
-    private final Map<UUID, UUID> lastAttacker = new HashMap<>();
-    private final Map<UUID, Map<UUID, Long>> incomingAttackers = new HashMap<>();
+    private final Map<UUID, Long> combat = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Long> trident = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Long> pearl = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Long> windCharge = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Long> mace = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, UUID> lastAttacker = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> incomingAttackers = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Map<UUID, Long>> outgoingTargets = new java.util.concurrent.ConcurrentHashMap<>();
 
     CombatListener(TrueCombatPlugin plugin) {
         this.plugin = plugin;
@@ -52,7 +57,7 @@ final class CombatListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onMaceDamage(EntityDamageByEntityEvent event) {
         if (!enabled("mace.enabled") || !(event.getDamager() instanceof Player player)
-                || player.getInventory().getItemInMainHand().getType() != Material.MACE) return;
+                || MACE == null || player.getInventory().getItemInMainHand().getType() != MACE) return;
         if (onCooldown(mace, player)) {
             event.setCancelled(true);
         }
@@ -66,12 +71,14 @@ final class CombatListener implements Listener {
         if (plugin.getConfig().getBoolean("pvp.refresh-on-hit", true) || !active(combat, attacker.getUniqueId())) tag(attacker);
         if (plugin.getConfig().getBoolean("pvp.refresh-on-hit", true) || !active(combat, victim.getUniqueId())) tag(victim);
         lastAttacker.put(victim.getUniqueId(), attacker.getUniqueId());
-        incomingAttackers.computeIfAbsent(victim.getUniqueId(), ignored -> new HashMap<>())
+        incomingAttackers.computeIfAbsent(victim.getUniqueId(), ignored -> new java.util.concurrent.ConcurrentHashMap<>())
                 .put(attacker.getUniqueId(), combat.get(victim.getUniqueId()));
-        if (enabled("mace.enabled") && attacker.getInventory().getItemInMainHand().getType() == Material.MACE) {
-            start(mace, attacker, "mace.cooldown-seconds", Material.MACE);
-        } else if (enabled("wind-charge.enabled") && event.getDamager().getType() == org.bukkit.entity.EntityType.WIND_CHARGE) {
-            start(windCharge, attacker, "wind-charge.cooldown-seconds", Material.WIND_CHARGE);
+        outgoingTargets.computeIfAbsent(attacker.getUniqueId(), ignored -> new java.util.concurrent.ConcurrentHashMap<>())
+                .put(victim.getUniqueId(), combat.get(attacker.getUniqueId()));
+        if (enabled("mace.enabled") && MACE != null && attacker.getInventory().getItemInMainHand().getType() == MACE) {
+            start(mace, attacker, "mace.cooldown-seconds", MACE);
+        } else if (enabled("wind-charge.enabled") && WIND_CHARGE_ENTITY != null && event.getDamager().getType() == WIND_CHARGE_ENTITY) {
+            start(windCharge, attacker, "wind-charge.cooldown-seconds", WIND_CHARGE);
         } else if (enabled("trident.enabled") && attacker.isRiptiding()) {
             start(trident, attacker, "trident.cooldown-seconds", Material.TRIDENT);
         }
@@ -84,23 +91,26 @@ final class CombatListener implements Listener {
         Material type = event.getItem().getType();
         if (type == Material.ENDER_PEARL && !enabled("ender-pearl.enabled") && !player.hasPermission("truecombat.bypass")) {
             event.setCancelled(true);
-            player.sendActionBar(component("ender-pearl.disabled", player, 0));
-        } else if (type == Material.WIND_CHARGE && !enabled("wind-charge.enabled") && !player.hasPermission("truecombat.bypass")) {
+            actionBar(player, component("ender-pearl.disabled", player, 0));
+        } else if (type == WIND_CHARGE && !enabled("wind-charge.enabled") && !player.hasPermission("truecombat.bypass")) {
             event.setCancelled(true);
-            player.sendActionBar(component("wind-charge.disabled", player, 0));
+            actionBar(player, component("wind-charge.disabled", player, 0));
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onProjectileLaunch(ProjectileLaunchEvent event) {
-        if (!(event.getEntity() instanceof Projectile projectile) || !(projectile.getShooter() instanceof Player player)) return;
+        if (!(event.getEntity() instanceof Projectile)) return;
+        Projectile projectile = (Projectile) event.getEntity();
+        if (!(projectile.getShooter() instanceof Player)) return;
+        Player player = (Player) projectile.getShooter();
         Material type = projectile.getType() == org.bukkit.entity.EntityType.ENDER_PEARL ? Material.ENDER_PEARL
-                : projectile.getType() == org.bukkit.entity.EntityType.WIND_CHARGE ? Material.WIND_CHARGE : null;
+                : projectile.getType() == WIND_CHARGE_ENTITY ? WIND_CHARGE : null;
         if (type == null) return;
         if (type == Material.ENDER_PEARL) {
             if (!enabled("ender-pearl.enabled") && !player.hasPermission("truecombat.bypass")) {
                 event.setCancelled(true);
-                player.sendActionBar(component("ender-pearl.disabled", player, 0));
+                actionBar(player, component("ender-pearl.disabled", player, 0));
             } else if (!player.hasPermission("truecombat.bypass")) {
                 if (onCooldown(pearl, player)) event.setCancelled(true);
             }
@@ -108,7 +118,7 @@ final class CombatListener implements Listener {
         }
         if (!enabled("wind-charge.enabled") && !player.hasPermission("truecombat.bypass")) {
             event.setCancelled(true);
-            player.sendActionBar(component("wind-charge.disabled", player, 0));
+            actionBar(player, component("wind-charge.disabled", player, 0));
         } else if (active(combat, player.getUniqueId()) && !player.hasPermission("truecombat.bypass") && onCooldown(windCharge, player)) {
             event.setCancelled(true);
         }
@@ -116,16 +126,19 @@ final class CombatListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onSuccessfulProjectileLaunch(ProjectileLaunchEvent event) {
-        if (!(event.getEntity() instanceof Projectile projectile) || !(projectile.getShooter() instanceof Player player)
-                || player.hasPermission("truecombat.bypass")) return;
+        if (!(event.getEntity() instanceof Projectile)) return;
+        Projectile projectile = (Projectile) event.getEntity();
+        if (!(projectile.getShooter() instanceof Player)) return;
+        Player player = (Player) projectile.getShooter();
+        if (player.hasPermission("truecombat.bypass")) return;
         if (projectile.getType() == org.bukkit.entity.EntityType.ENDER_PEARL) {
             if (enabled("ender-pearl.enabled") && active(combat, player.getUniqueId())) {
                 start(pearl, player, "ender-pearl.cooldown-seconds", Material.ENDER_PEARL);
             }
-        } else if (projectile.getType() == org.bukkit.entity.EntityType.WIND_CHARGE
+        } else if (projectile.getType() == WIND_CHARGE_ENTITY
                 && enabled("wind-charge.enabled")
                 && (!plugin.getConfig().getBoolean("wind-charge.only-in-combat", true) || active(combat, player.getUniqueId()))) {
-            start(windCharge, player, "wind-charge.cooldown-seconds", Material.WIND_CHARGE);
+            start(windCharge, player, "wind-charge.cooldown-seconds", WIND_CHARGE);
         }
     }
 
@@ -171,7 +184,7 @@ final class CombatListener implements Listener {
         removeAttacker(victim.getUniqueId());
         lastAttacker.remove(victim.getUniqueId());
         clearPlayerState(victim);
-        if (killer != null && !hasActiveIncomingAttacker(killer.getUniqueId())) {
+        if (killer != null && !hasActiveCombatPartner(killer.getUniqueId())) {
             clearCombatTagKeepCooldowns(killer);
         }
     }
@@ -196,14 +209,14 @@ final class CombatListener implements Listener {
             plugin.combatLoggers().add(player.getUniqueId());
             if (plugin.getConfig().getBoolean("combat-log.reward-commands.enabled")) {
                 for (String command : plugin.getConfig().getStringList("combat-log.reward-commands.commands")) {
-                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command
+                    plugin.scheduler().runGlobal(() -> plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command
                             .replace("<logger>", player.getName())
-                            .replace("<attacker>", attacker == null ? "" : attacker.getName()));
+                            .replace("<attacker>", attacker == null ? "" : attacker.getName())));
                 }
             }
             if (plugin.getConfig().getBoolean("combat-log.drop-inventory")) dropInventory(player);
             if (plugin.getConfig().getBoolean("combat-log.broadcast", true)) {
-                plugin.getServer().broadcast(MINI_MESSAGE.deserialize(text("combat-log.broadcast", player, 0)));
+                broadcast(text("combat-log.broadcast", player, 0));
             }
             if (plugin.getConfig().getBoolean("combat-log.force-kill") && !player.isDead()) player.setHealth(0.0D);
         }
@@ -212,18 +225,18 @@ final class CombatListener implements Listener {
     void tick() {
         long now = System.currentTimeMillis();
         expireIncomingAttackers(now);
-        for (Player player : plugin.getServer().getOnlinePlayers()) {
+        for (Player player : plugin.getServer().getOnlinePlayers()) plugin.scheduler().run(player, () -> {
             Long end = combat.get(player.getUniqueId());
-            if (end != null && end <= now) {
+            if (end != null && end <= System.currentTimeMillis()) {
                 combat.remove(player.getUniqueId());
                 player.sendMessage(component("combat.expired", player, 0));
             }
-            sendHud(player, now);
-        }
+            sendHud(player, System.currentTimeMillis());
+        });
     }
 
     void clear() {
-        combat.clear(); trident.clear(); pearl.clear(); windCharge.clear(); mace.clear(); incomingAttackers.clear(); lastAttacker.clear();
+        combat.clear(); trident.clear(); pearl.clear(); windCharge.clear(); mace.clear(); incomingAttackers.clear(); outgoingTargets.clear(); lastAttacker.clear();
     }
 
     void tagForAdmin(Player player) {
@@ -253,7 +266,7 @@ final class CombatListener implements Listener {
         if (enabled("actionbar.show-pvp")) addHud(parts, "actionbar.pvp", combat, player, now);
         if (enabled("actionbar.show-mace")) addHud(parts, "actionbar.mace", mace, player, now);
         if (enabled("actionbar.show-wind-charge")) addHud(parts, "actionbar.wind-charge", windCharge, player, now);
-        if (!parts.isEmpty()) player.sendActionBar(MINI_MESSAGE.deserialize(String.join(plugin.locale().get("actionbar.separator"), parts)));
+        if (!parts.isEmpty()) actionBar(player, legacy(String.join(plugin.locale().get("actionbar.separator"), parts)));
     }
 
     private void addHud(List<String> parts, String path, Map<UUID, Long> timer, Player player, long now) {
@@ -280,7 +293,9 @@ final class CombatListener implements Listener {
     }
 
     private void validateAfterInventoryChange(Player player) {
-        plugin.getServer().getScheduler().runTask(plugin, () -> trimTotems(player));
+        plugin.scheduler().runLater(player, () -> {
+            if (player.isValid()) trimTotems(player);
+        }, 1L);
     }
 
     private void trimTotems(Player player) {
@@ -353,24 +368,38 @@ final class CombatListener implements Listener {
         combat.remove(id); trident.remove(id); pearl.remove(id); windCharge.remove(id); mace.remove(id);
         removeAttacker(id);
         incomingAttackers.remove(id);
+        outgoingTargets.remove(id);
         lastAttacker.remove(id);
     }
 
     private void clearPlayerState(Player player) {
         clearPlayer(player.getUniqueId());
-        player.sendActionBar(Component.empty());
+        actionBar(player, "");
     }
 
     private void clearCombatTagKeepCooldowns(Player player) {
         if (combat.remove(player.getUniqueId()) == null) return;
         long now = System.currentTimeMillis();
         if (hasActiveItemCooldown(player.getUniqueId(), now)) sendHud(player, now);
-        else player.sendActionBar(Component.empty());
+        else actionBar(player, "");
     }
 
     private boolean hasActiveItemCooldown(UUID playerId, long now) {
         return trident.getOrDefault(playerId, 0L) > now || pearl.getOrDefault(playerId, 0L) > now
                 || windCharge.getOrDefault(playerId, 0L) > now || mace.getOrDefault(playerId, 0L) > now;
+    }
+
+    private boolean hasActiveCombatPartner(UUID playerId) {
+        if (hasActiveIncomingAttacker(playerId)) return true;
+        Map<UUID, Long> targets = outgoingTargets.get(playerId);
+        if (targets == null) return false;
+        long now = System.currentTimeMillis();
+        targets.values().removeIf(end -> end <= now);
+        if (targets.isEmpty()) {
+            outgoingTargets.remove(playerId);
+            return false;
+        }
+        return true;
     }
 
     private boolean hasActiveIncomingAttacker(UUID playerId) {
@@ -386,19 +415,29 @@ final class CombatListener implements Listener {
     }
 
     private void removeAttacker(UUID attackerId) {
-        for (Iterator<Map.Entry<UUID, Map<UUID, Long>>> iterator = incomingAttackers.entrySet().iterator(); iterator.hasNext();) {
-            Map<UUID, Long> attackers = iterator.next().getValue();
+        incomingAttackers.entrySet().removeIf(entry -> {
+            Map<UUID, Long> attackers = entry.getValue();
             attackers.remove(attackerId);
-            if (attackers.isEmpty()) iterator.remove();
-        }
+            return attackers.isEmpty();
+        });
+        outgoingTargets.entrySet().removeIf(entry -> {
+            Map<UUID, Long> targets = entry.getValue();
+            targets.remove(attackerId);
+            return targets.isEmpty();
+        });
     }
 
     private void expireIncomingAttackers(long now) {
-        for (Iterator<Map.Entry<UUID, Map<UUID, Long>>> iterator = incomingAttackers.entrySet().iterator(); iterator.hasNext();) {
-            Map<UUID, Long> attackers = iterator.next().getValue();
+        incomingAttackers.entrySet().removeIf(entry -> {
+            Map<UUID, Long> attackers = entry.getValue();
             attackers.values().removeIf(end -> end <= now);
-            if (attackers.isEmpty()) iterator.remove();
-        }
+            return attackers.isEmpty();
+        });
+        outgoingTargets.entrySet().removeIf(entry -> {
+            Map<UUID, Long> targets = entry.getValue();
+            targets.values().removeIf(end -> end <= now);
+            return targets.isEmpty();
+        });
     }
 
     private boolean active(Map<UUID, Long> map, UUID id) { return map.getOrDefault(id, 0L) > System.currentTimeMillis(); }
@@ -407,8 +446,13 @@ final class CombatListener implements Listener {
     private int limit() { return Math.max(0, plugin.getConfig().getInt("totems.maximum", 4)); }
     private boolean isTotem(ItemStack item) { return item != null && item.getType() == Material.TOTEM_OF_UNDYING; }
     private long roundSeconds(long millis) { return Math.max(1L, (millis + 999L) / 1000L); }
-    private void warnTotem(Player player) { player.sendActionBar(component("totems.limit-reached", player, 0)); }
-    private Component component(String path, Player player, long seconds) { return MINI_MESSAGE.deserialize(text(path, player, seconds)); }
+    private void warnTotem(Player player) { actionBar(player, component("totems.limit-reached", player, 0)); }
+    private String component(String path, Player player, long seconds) { return legacy(text(path, player, seconds)); }
+    private String legacy(String text) { return LEGACY.serialize(MINI_MESSAGE.deserialize(text)); }
+    private void actionBar(Player player, String text) {
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(text));
+    }
+    private void broadcast(String text) { plugin.scheduler().runGlobal(() -> plugin.getServer().broadcastMessage(legacy(text))); }
     private String text(String path, Player player, long seconds) {
         return plugin.locale().get(path).replace("<player>", player.getName()).replace("<maximum>", Integer.toString(limit())).replace("<time>", Long.toString(seconds));
     }

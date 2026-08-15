@@ -14,22 +14,27 @@ public final class TrueCombatPlugin extends JavaPlugin implements TabCompleter {
     private CombatListener listener;
     private LocaleManager locale;
     private CombatLoggerStore combatLoggers;
+    private PlatformScheduler scheduler;
+    private PlatformScheduler.TaskHandle ticker;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         locale = new LocaleManager(this);
         combatLoggers = new CombatLoggerStore(this);
+        scheduler = new PlatformScheduler(this);
         listener = new CombatListener(this);
         getServer().getPluginManager().registerEvents(listener, this);
-        getServer().getScheduler().runTaskTimer(this, listener::tick, 20L, 20L);
-        getCommand("truecombat").setTabCompleter(this);
-        getLogger().info("TrueCombat v2.1.1 enabled. Author: TrueWulf.");
+        ticker = scheduler.runTimer(listener::tick, 20L, 20L);
+        if (getCommand("truecombat") != null) getCommand("truecombat").setTabCompleter(this);
+        getLogger().info("TrueCombat v" + getDescription().getVersion() + " enabled.");
     }
 
     @Override
     public void onDisable() {
+        if (ticker != null) ticker.cancel();
         if (listener != null) listener.clear();
+        if (combatLoggers != null) combatLoggers.close();
     }
 
     @Override
@@ -45,7 +50,7 @@ public final class TrueCombatPlugin extends JavaPlugin implements TabCompleter {
                 locale.reload();
                 sender.sendMessage("TrueCombat configuration and locale reloaded.");
             }
-            case "status" -> sender.sendMessage("TrueCombat v" + getPluginMeta().getVersion() + ": "
+            case "status" -> sender.sendMessage("TrueCombat v" + getDescription().getVersion() + ": "
                     + getServer().getOnlinePlayers().size() + " players online.");
             case "tag", "untag", "clear" -> {
                 if (args.length < 2) {
@@ -96,5 +101,9 @@ public final class TrueCombatPlugin extends JavaPlugin implements TabCompleter {
 
     CombatLoggerStore combatLoggers() {
         return combatLoggers;
+    }
+
+    PlatformScheduler scheduler() {
+        return scheduler;
     }
 }

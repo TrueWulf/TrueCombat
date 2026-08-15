@@ -1,9 +1,10 @@
 name: TrueCombat
-version: 2.1.1
+version: 2.2.0
 main: ru.truwlf.truecombat.TrueCombatPlugin
-api-version: '1.21'
+api-version: '1.20'
+folia-supported: true
 author: TrueWulf
-description: Super lightweight combat-log and PvP cooldown plugin for Paper and Purpur 1.21.x
+description: Fast, lightweight combat protection for Bukkit-compatible Minecraft servers.
 commands:
   truecombat:
     description: Manage TrueCombat.

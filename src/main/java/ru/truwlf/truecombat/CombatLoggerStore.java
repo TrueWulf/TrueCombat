@@ -7,12 +7,22 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 final class CombatLoggerStore {
     private final File file;
     private final Set<UUID> loggers = new HashSet<>();
+    private final ExecutorService saver = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "TrueCombat-logger-store");
+        thread.setDaemon(true);
+        return thread;
+    });
+    private final TrueCombatPlugin plugin;
 
     CombatLoggerStore(TrueCombatPlugin plugin) {
+        this.plugin = plugin;
         file = new File(plugin.getDataFolder(), "combat-loggers.yml");
         YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
         for (String raw : data.getStringList("players")) {
@@ -24,23 +34,38 @@ final class CombatLoggerStore {
         }
     }
 
-    boolean remove(UUID playerId) {
+    synchronized boolean remove(UUID playerId) {
         boolean removed = loggers.remove(playerId);
         if (removed) save();
         return removed;
     }
 
-    void add(UUID playerId) {
+    synchronized void add(UUID playerId) {
         if (loggers.add(playerId)) save();
     }
 
     private void save() {
+        Set<UUID> snapshot = Set.copyOf(loggers);
+        saver.execute(() -> saveSnapshot(snapshot));
+    }
+
+    private void saveSnapshot(Set<UUID> snapshot) {
         YamlConfiguration data = new YamlConfiguration();
-        data.set("players", loggers.stream().map(UUID::toString).toList());
+        data.set("players", snapshot.stream().map(UUID::toString).toList());
         try {
             data.save(file);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to save combat logger data.", exception);
+            plugin.getLogger().log(java.util.logging.Level.WARNING, "Unable to save combat logger data.", exception);
+        }
+    }
+
+    void close() {
+        saver.shutdown();
+        try {
+            if (!saver.awaitTermination(5, TimeUnit.SECONDS)) saver.shutdownNow();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            saver.shutdownNow();
         }
     }
 }
