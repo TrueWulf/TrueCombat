@@ -1,0 +1,14 @@
+{
+  "loader": {
+    "name": "java_plain"
+  },
+  "license": "GPL-3.0-only",
+  "plugins": [
+    {
+      "id": "truecombat",
+      "name": "TrueCombat",
+      "version": "2.3.0",
+      "entrypoint": "ru.truwlf.truecombat.sponge.SpongeTrueCombat"
+    }
+  ]
+}

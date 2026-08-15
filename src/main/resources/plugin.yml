@@ -1,5 +1,5 @@
 name: TrueCombat
-version: 2.2.0
+version: 2.3.0
 main: ru.truwlf.truecombat.TrueCombatPlugin
 api-version: '1.20'
 folia-supported: true
@@ -9,9 +9,21 @@ commands:
   truecombat:
     description: Manage TrueCombat.
     aliases: [tc]
-    permission: truecombat.admin
 permissions:
   truecombat.admin:
+    default: op
+    children:
+      truecombat.admin.reload: true
+      truecombat.admin.status: true
+      truecombat.admin.combat: true
+      truecombat.admin.debug: true
+  truecombat.admin.reload:
+    default: op
+  truecombat.admin.status:
+    default: op
+  truecombat.admin.combat:
+    default: op
+  truecombat.admin.debug:
     default: op
   truecombat.bypass:
     default: false

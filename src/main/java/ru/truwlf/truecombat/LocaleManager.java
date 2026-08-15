@@ -27,11 +27,13 @@ final class LocaleManager {
             case "it_it" -> "it_IT";
             case "es_es" -> "es_ES";
             case "pt_br" -> "pt_BR";
+            case "zh_cn" -> "zh_CN";
+            case "ja_jp" -> "ja_JP";
             default -> "en_US";
         };
         File directory = new File(plugin.getDataFolder(), "lang");
         if (!directory.exists() && !directory.mkdirs()) plugin.getLogger().warning("Unable to create lang directory.");
-        for (String bundledLocale : List.of("en_US", "ru_RU", "de_DE", "fr_FR", "it_IT", "es_ES", "pt_BR")) {
+        for (String bundledLocale : List.of("en_US", "ru_RU", "de_DE", "fr_FR", "it_IT", "es_ES", "pt_BR", "zh_CN", "ja_JP")) {
             File bundled = new File(directory, bundledLocale + ".yml");
             if (!bundled.exists()) plugin.saveResource("lang/" + bundledLocale + ".yml", false);
         }

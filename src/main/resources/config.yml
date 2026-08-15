@@ -1,7 +1,18 @@
-# TrueCombat v2.2.0 | Author: TrueWulf
+# TrueCombat v2.3.0 | Author: TrueWulf
 # All messages use MiniMessage and are stored in lang/<locale>.yml.
-# Bundled locales: en_US, ru_RU, de_DE, fr_FR, it_IT, es_ES, pt_BR.
+# Bundled locales: en_US, ru_RU, de_DE, fr_FR, it_IT, es_ES, pt_BR, zh_CN, ja_JP.
 lang: en_US
+
+messages:
+  prefix: '[TrueCombat] '
+
+proxy:
+  # Sends combat state to a connected Velocity or Waterfall proxy.
+  sync-combat-state: true
+  # Proxy-side connections are blocked while this player is in combat.
+  block-server-switch: true
+  # Plugin-message channel used by backend and proxy adapters.
+  channel: truecombat:state
 
 pvp:
   # Enables PvP tagging when one player damages another player.
@@ -10,6 +21,8 @@ pvp:
   duration-seconds: 30
   # Refreshes the PvP timer after each valid PvP hit.
   refresh-on-hit: true
+  # Ignore damage caused by these entity types when starting combat.
+  ignored-damage-causes: []
 
 combat-log:
   enabled: true
@@ -25,6 +38,8 @@ combat-log:
     # Example (disabled): 'yourhearts give <logger> heart 1'
     enabled: false
     commands: []
+  # Commands available to staff for inspecting combat-log state.
+  command-permission: truecombat.admin.combatlog
 
 totems:
   enabled: false
@@ -67,3 +82,7 @@ actionbar:
   show-pvp: true
   show-mace: true
   show-wind-charge: true
+
+admin:
+  # Allows /truecombat debug to show active state counts.
+  debug-enabled: false

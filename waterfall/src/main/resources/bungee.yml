@@ -1,0 +1,12 @@
+name: TrueCombat
+version: 2.3.0
+main: ru.truwlf.truecombat.waterfall.WaterfallTrueCombat
+author: TrueWulf
+description: Combat-state protection for Waterfall and BungeeCord-compatible proxies.
+commands:
+  truecombat:
+    aliases: [tc]
+    permission: truecombat.admin
+permissions:
+  truecombat.admin:
+    default: op

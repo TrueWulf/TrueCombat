@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.0
+
+- Added Sponge API 8.2.x combat adapter.
+- Added Velocity 3.4.x proxy guard for synchronized combat sessions.
+- Added Waterfall/BungeeCord-compatible proxy guard for synchronized combat sessions.
+- Added shared plugin-message protocol for backend combat state synchronization.
+- Added expanded configuration, admin commands, permissions, and tab completion.
+- Standardized the repository license as GNU GPLv3.
+
 ## 2.2.0
 
 - Added compatibility profiles for Minecraft 1.20.x, 1.21.x, and 26.x.

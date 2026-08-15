@@ -66,6 +66,8 @@ final class CombatListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     private void onPvPDamage(EntityDamageByEntityEvent event) {
         if (!enabled("pvp.enabled") || !(event.getEntity() instanceof Player victim)) return;
+        if (plugin.getConfig().getStringList("pvp.ignored-damage-causes").stream()
+                .anyMatch(cause -> cause.equalsIgnoreCase(event.getDamager().getType().name()))) return;
         Player attacker = playerDamager(event.getDamager());
         if (attacker == null || attacker.getUniqueId().equals(victim.getUniqueId())) return;
         if (plugin.getConfig().getBoolean("pvp.refresh-on-hit", true) || !active(combat, attacker.getUniqueId())) tag(attacker);
@@ -229,6 +231,7 @@ final class CombatListener implements Listener {
             Long end = combat.get(player.getUniqueId());
             if (end != null && end <= System.currentTimeMillis()) {
                 combat.remove(player.getUniqueId());
+                sendState(player, false, 0L);
                 player.sendMessage(component("combat.expired", player, 0));
             }
             sendHud(player, System.currentTimeMillis());
@@ -245,16 +248,25 @@ final class CombatListener implements Listener {
 
     void clearCombatTag(Player player) {
         clearCombatTagKeepCooldowns(player);
+        sendState(player, false, 0L);
     }
 
     void clearPlayerStateForAdmin(Player player) {
         clearPlayerState(player);
     }
 
+    int combatCount() {
+        long now = System.currentTimeMillis();
+        combat.entrySet().removeIf(entry -> entry.getValue() <= now);
+        return combat.size();
+    }
+
     private void tag(Player player) {
         UUID id = player.getUniqueId();
         boolean newTag = !active(combat, id);
-        combat.put(id, System.currentTimeMillis() + seconds("pvp.duration-seconds") * 1000L);
+        long duration = seconds("pvp.duration-seconds");
+        combat.put(id, System.currentTimeMillis() + duration * 1000L);
+        sendState(player, true, duration);
         if (newTag) player.sendMessage(component("combat.entered", player, 0));
     }
 
@@ -374,7 +386,15 @@ final class CombatListener implements Listener {
 
     private void clearPlayerState(Player player) {
         clearPlayer(player.getUniqueId());
+        sendState(player, false, 0L);
         actionBar(player, "");
+    }
+
+    private void sendState(Player player, boolean active, long seconds) {
+        if (player.isOnline() && plugin.getConfig().getBoolean("proxy.sync-combat-state", true)) {
+            player.sendPluginMessage(plugin, plugin.registeredProxyChannel(),
+                    CombatProtocol.state(player.getUniqueId(), active, seconds));
+        }
     }
 
     private void clearCombatTagKeepCooldowns(Player player) {

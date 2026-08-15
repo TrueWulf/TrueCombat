@@ -1,0 +1,19 @@
+combat:
+  entered: '<#5C82FF>你已进入 PvP 战斗状态。'
+  expired: '<#5C82FF>你已离开 PvP 战斗状态。'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> 在战斗中退出了游戏并受到惩罚。'
+  rejoin-message: '<red>你在 PvP 战斗中退出了游戏，因此受到了惩罚。</red>'
+totems:
+  limit-reached: '<red>不死图腾数量上限：<maximum>。</red>'
+ender-pearl:
+  disabled: '<red>此服务器已禁用末影珍珠。</red>'
+wind-charge:
+  disabled: '<red>此服务器已禁用风弹。</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>三叉戟 <#FFFFFF><time> 秒'
+  pvp: '<#5C82FF>PvP <#FFFFFF><time> 秒'
+  mace: '<#5C82FF>重锤 <#FFFFFF><time> 秒'
+  wind-charge: '<#5C82FF>风弹 <#FFFFFF><time> 秒'
+  ender-pearl: '<#5C82FF>末影珍珠 <#FFFFFF><time> 秒'

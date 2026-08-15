@@ -1,0 +1,19 @@
+combat:
+  entered: '<#5C82FF>PvP 戦闘状態になりました。'
+  expired: '<#5C82FF>PvP 戦闘状態が終了しました。'
+combat-log:
+  broadcast: '<#5C82FF><bold>PvP</bold> <#FFFFFF><player> は戦闘中にログアウトしたため処罰されました。'
+  rejoin-message: '<red>PvP 戦闘中にログアウトしたため、処罰されました。</red>'
+totems:
+  limit-reached: '<red>不死のトーテム上限：<maximum>。</red>'
+ender-pearl:
+  disabled: '<red>このサーバーではエンダーパールが無効です。</red>'
+wind-charge:
+  disabled: '<red>このサーバーではウィンドチャージが無効です。</red>'
+actionbar:
+  separator: ' <#888888>|</#888888> '
+  trident: '<#5C82FF>トライデント <#FFFFFF><time> 秒'
+  pvp: '<#5C82FF>PvP <#FFFFFF><time> 秒'
+  mace: '<#5C82FF>メイス <#FFFFFF><time> 秒'
+  wind-charge: '<#5C82FF>ウィンドチャージ <#FFFFFF><time> 秒'
+  ender-pearl: '<#5C82FF>エンダーパール <#FFFFFF><time> 秒'

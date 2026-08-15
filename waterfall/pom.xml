@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>ru.truwlf</groupId>
+    <artifactId>truecombat-waterfall</artifactId>
+    <version>2.3.0</version>
+    <properties><maven.compiler.release>17</maven.compiler.release><bungeecord-api.version>1.21-R0.3</bungeecord-api.version></properties>
+    <repositories>
+        <repository><id>sonatype</id><url>https://oss.sonatype.org/content/repositories/snapshots</url></repository>
+        <repository><id>md5</id><url>https://repo.md-5.net/repository/releases/</url></repository>
+    </repositories>
+    <dependencies><dependency><groupId>net.md-5</groupId><artifactId>bungeecord-api</artifactId><version>${bungeecord-api.version}</version><scope>provided</scope></dependency></dependencies>
+    <build><finalName>TrueCombat-Waterfall</finalName></build>
+</project>

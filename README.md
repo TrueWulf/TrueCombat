@@ -29,7 +29,7 @@ The plugin is designed to be fast to start, light at runtime, easy to configure,
 - Server-wide Ender Pearl and Wind Charge controls.
 - Optional totem limit, including bundles.
 - Folia-safe scheduling and player state handling.
-- Built-in locales: English, Russian, German, French, Italian, Spanish, and Brazilian Portuguese.
+- Built-in locales: English, Russian, German, French, Italian, Spanish, Brazilian Portuguese, Simplified Chinese (`zh_CN`), and Japanese (`ja_JP`).
 - Admin commands with tab completion.
 
 ## Compatibility
@@ -42,6 +42,9 @@ The plugin is designed to be fast to start, light at runtime, easy to configure,
 | 1.21.x | `TrueCombat-Spigot-1.21.x.jar` | 21+ | Spigot and Bukkit-compatible forks | Build verified |
 | 26.1.x | `TrueCombat-26.1.x.jar` | 25+ | Matching Paper-family servers | Build verified with JDK 26 |
 | 26.2 | `TrueCombat-26.2.jar` | 25+ | Matching Paper-family servers | Build verified with JDK 26 |
+| Sponge 8.2.x | `TrueCombat-Sponge-8.x.jar` | 17+ | Sponge on the 1.16.5 server line | Build verified; runtime pending |
+| Velocity 3.4.x | `TrueCombat-Velocity.jar` | 17+ | Velocity proxy | Build verified; runtime pending |
+| Waterfall / BungeeCord-compatible | `TrueCombat-Waterfall.jar` | 17+ | Waterfall and compatible proxies | Build verified; runtime pending |
 
 TrueCombat uses Bukkit-compatible APIs and does not depend on Paper-only runtime classes. On Minecraft 1.20.x, 1.21-only items such as Maces and Wind Charges are unavailable and their features are automatically inactive.
 
@@ -50,6 +53,10 @@ Arclight and Mohist are best-effort compatibility targets and should be tested w
 ### Folia
 
 Folia is supported through platform-aware global and player schedulers. Install the artifact matching the Minecraft version and verify the server build in a staging environment before production deployment.
+
+### Sponge, Velocity, and Waterfall
+
+Sponge 8.2.x targets the Minecraft 1.16.5 server line and provides native combat tagging and combat-log handling. Velocity and Waterfall cannot see backend damage events directly, so their modules synchronize backend combat state and block proxy server switching while a player is tagged. Use a backend artifact together with the proxy artifact for a network deployment.
 
 ## Installation
 
@@ -60,6 +67,8 @@ Folia is supported through platform-aware global and player schedulers. Install 
 
 All bundled locale files are extracted to `plugins/TrueCombat/lang/` on first startup.
 
+For Sponge, install `TrueCombat-Sponge-8.x.jar` in the Sponge `mods` directory. For Velocity, install `TrueCombat-Velocity.jar` in the proxy `plugins` directory. For Waterfall, install `TrueCombat-Waterfall.jar` in the proxy `plugins` directory. Proxy modules require a backend TrueCombat adapter to receive combat state.
+
 ## Commands
 
 | Command | Description |
@@ -69,10 +78,13 @@ All bundled locale files are extracted to `plugins/TrueCombat/lang/` on first st
 | `/truecombat tag <player>` | Apply a PvP tag. |
 | `/truecombat untag <player>` | Remove a PvP tag. |
 | `/truecombat clear <player>` | Clear all TrueCombat timers. |
+| `/truecombat debug` | Show state counts when enabled in config. |
 
 Alias: `/tc`.
 
 Permission: `truecombat.admin`.
+
+Additional permissions are `truecombat.admin.reload`, `truecombat.admin.status`, `truecombat.admin.combat`, `truecombat.admin.debug`, and `truecombat.bypass`.
 
 ## Combat-Log Rewards
 

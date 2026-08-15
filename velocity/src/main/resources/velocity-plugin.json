@@ -1,0 +1,8 @@
+{
+  "id": "truecombat",
+  "name": "TrueCombat",
+  "version": "2.3.0",
+  "description": "Combat-state protection for Velocity networks.",
+  "authors": ["TrueWulf"],
+  "main": "ru.truwlf.truecombat.velocity.VelocityTrueCombat"
+}
