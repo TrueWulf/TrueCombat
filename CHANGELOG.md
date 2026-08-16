@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.2
+
+- Changed the default build to Paper 1.21.x with Java 21.
+- Fixed combat-tag cleanup after a kill while preserving combat with other opponents.
+- Prevented active PvP from ending immediately because of a victim's death cleanup.
+
+## 2.3.1
+
+- Fixed PvP timers configured as zero ending immediately.
+- Applied combat-log reward commands when a tagged player dies from any cause.
+- Added short locale names such as `ru` and `en` and logged the loaded locale.
+
 ## 2.3.0
 
 - Added Sponge API 8.2.x combat adapter.

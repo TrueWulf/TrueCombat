@@ -1,5 +1,5 @@
 name: TrueCombat
-version: 2.3.0
+version: 2.3.2
 main: ru.truwlf.truecombat.TrueCombatPlugin
 api-version: '1.20'
 folia-supported: true

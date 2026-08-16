@@ -18,17 +18,17 @@ final class LocaleManager {
 
     void reload() {
         String configured = plugin.getConfig().getString("lang", "en_US");
-        String name = configured.replace('-', '_').toLowerCase(Locale.ROOT);
+        String name = configured == null ? "en_us" : configured.trim().replace('-', '_').toLowerCase(Locale.ROOT);
         name = switch (name) {
-            case "en_us" -> "en_US";
-            case "ru_ru" -> "ru_RU";
-            case "de_de" -> "de_DE";
-            case "fr_fr" -> "fr_FR";
-            case "it_it" -> "it_IT";
-            case "es_es" -> "es_ES";
-            case "pt_br" -> "pt_BR";
-            case "zh_cn" -> "zh_CN";
-            case "ja_jp" -> "ja_JP";
+            case "en", "en_us" -> "en_US";
+            case "ru", "ru_ru" -> "ru_RU";
+            case "de", "de_de" -> "de_DE";
+            case "fr", "fr_fr" -> "fr_FR";
+            case "it", "it_it" -> "it_IT";
+            case "es", "es_es" -> "es_ES";
+            case "pt", "pt_br" -> "pt_BR";
+            case "zh", "zh_cn" -> "zh_CN";
+            case "ja", "ja_jp" -> "ja_JP";
             default -> "en_US";
         };
         File directory = new File(plugin.getDataFolder(), "lang");
@@ -44,6 +44,7 @@ final class LocaleManager {
             if (!requested.exists()) plugin.saveResource("lang/en_US.yml", false);
         }
         locale = YamlConfiguration.loadConfiguration(requested);
+        plugin.getLogger().info("Loaded locale: " + name);
     }
 
     String get(String path) {

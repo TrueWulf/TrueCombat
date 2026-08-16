@@ -95,7 +95,7 @@ combat-log:
   reward-commands:
     enabled: true
     commands:
-      - 'yourhearts give <logger> heart 1'
+       - 'lifestealz giveitem <logger> defaultheart 1'
 ```
 
 The command runs before the logger's inventory is dropped, so the awarded heart drops with their items. `<logger>` is the player who disconnected; `<attacker>` is their last PvP attacker.

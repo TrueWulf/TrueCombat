@@ -1,4 +1,4 @@
-# TrueCombat v2.3.0 | Author: TrueWulf
+# TrueCombat v2.3.2 | Author: TrueWulf
 # All messages use MiniMessage and are stored in lang/<locale>.yml.
 # Bundled locales: en_US, ru_RU, de_DE, fr_FR, it_IT, es_ES, pt_BR, zh_CN, ja_JP.
 lang: en_US
@@ -35,7 +35,7 @@ combat-log:
     # When enabled, commands are run before the logger's inventory is dropped.
     # Use your hearts plugin's give command with <logger> so its item drops from
     # the combat logger. <attacker> is the last PvP attacker, when available.
-    # Example (disabled): 'yourhearts give <logger> heart 1'
+    # Example for LifeStealZ (disabled): 'lifestealz giveitem <logger> defaultheart 1'
     enabled: false
     commands: []
   # Commands available to staff for inspecting combat-log state.

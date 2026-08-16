@@ -4,16 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.truwlf</groupId>
     <artifactId>TrueCombat</artifactId>
-    <version>2.3.0</version>
+    <version>2.3.2</version>
     <name>TrueCombat</name>
     <description>Fast, lightweight combat protection for Bukkit-compatible Minecraft servers.</description>
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <server-api.groupId>io.papermc.paper</server-api.groupId>
         <server-api.artifactId>paper-api</server-api.artifactId>
-        <paper-api.version>1.20.1-R0.1-SNAPSHOT</paper-api.version>
-        <artifact.suffix>1.20.x</artifact.suffix>
+        <paper-api.version>1.21.1-R0.1-SNAPSHOT</paper-api.version>
+        <artifact.suffix>1.21.x</artifact.suffix>
     </properties>
     <repositories>
         <repository>
@@ -69,7 +69,6 @@
         </profile>
         <profile>
             <id>mc-1.20</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
             <properties>
                 <paper-api.version>1.20.1-R0.1-SNAPSHOT</paper-api.version>
                 <artifact.suffix>1.20.x</artifact.suffix>
@@ -88,8 +87,9 @@
         </profile>
         <profile>
             <id>mc-1.21</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
             <properties>
-                <paper-api.version>1.21.11-R0.1-SNAPSHOT</paper-api.version>
+                <paper-api.version>1.21.1-R0.1-SNAPSHOT</paper-api.version>
                 <artifact.suffix>1.21.x</artifact.suffix>
                 <maven.compiler.release>21</maven.compiler.release>
             </properties>

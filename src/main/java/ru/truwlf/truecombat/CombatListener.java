@@ -183,12 +183,31 @@ final class CombatListener implements Listener {
     private void onDeath(PlayerDeathEvent event) {
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
-        removeAttacker(victim.getUniqueId());
-        lastAttacker.remove(victim.getUniqueId());
-        clearPlayerState(victim);
-        if (killer != null && !hasActiveCombatPartner(killer.getUniqueId())) {
-            clearCombatTagKeepCooldowns(killer);
+        UUID victimId = victim.getUniqueId();
+        List<UUID> combatPartners = new ArrayList<>();
+        Map<UUID, Long> incoming = incomingAttackers.get(victimId);
+        Map<UUID, Long> outgoing = outgoingTargets.get(victimId);
+        if (incoming != null) combatPartners.addAll(incoming.keySet());
+        if (outgoing != null) combatPartners.addAll(outgoing.keySet());
+        if (killer != null) combatPartners.add(killer.getUniqueId());
+
+        boolean wasInCombat = active(combat, victimId) && enabled("combat-log.enabled");
+        Player lastPvPAttacker = lastAttacker.containsKey(victimId)
+                ? plugin.getServer().getPlayer(lastAttacker.get(victimId)) : null;
+
+        if (wasInCombat && plugin.getConfig().getBoolean("combat-log.reward-commands.enabled")) {
+            runRewardCommandsOnDeath(victim, lastPvPAttacker, event);
         }
+
+        removeAttacker(victimId);
+        lastAttacker.remove(victimId);
+        clearPlayerState(victim);
+
+        combatPartners.stream().distinct()
+                .map(plugin.getServer()::getPlayer)
+                .filter(player -> player != null && player.isOnline())
+                .filter(player -> !hasActiveCombatPartner(player.getUniqueId()))
+                .forEach(this::clearCombatTagKeepCooldowns);
     }
 
     @EventHandler
@@ -210,11 +229,7 @@ final class CombatListener implements Listener {
         if (combatLogged) {
             plugin.combatLoggers().add(player.getUniqueId());
             if (plugin.getConfig().getBoolean("combat-log.reward-commands.enabled")) {
-                for (String command : plugin.getConfig().getStringList("combat-log.reward-commands.commands")) {
-                    plugin.scheduler().runGlobal(() -> plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command
-                            .replace("<logger>", player.getName())
-                            .replace("<attacker>", attacker == null ? "" : attacker.getName())));
-                }
+                runRewardCommands(player, attacker);
             }
             if (plugin.getConfig().getBoolean("combat-log.drop-inventory")) dropInventory(player);
             if (plugin.getConfig().getBoolean("combat-log.broadcast", true)) {
@@ -264,7 +279,7 @@ final class CombatListener implements Listener {
     private void tag(Player player) {
         UUID id = player.getUniqueId();
         boolean newTag = !active(combat, id);
-        long duration = seconds("pvp.duration-seconds");
+        long duration = Math.max(1L, plugin.getConfig().getLong("pvp.duration-seconds", 30L));
         combat.put(id, System.currentTimeMillis() + duration * 1000L);
         sendState(player, true, duration);
         if (newTag) player.sendMessage(component("combat.entered", player, 0));
@@ -404,31 +419,67 @@ final class CombatListener implements Listener {
         else actionBar(player, "");
     }
 
+    private void runRewardCommands(Player logger, Player attacker) {
+        for (String command : plugin.getConfig().getStringList("combat-log.reward-commands.commands")) {
+            if (command == null || command.isBlank()) continue;
+            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), command
+                    .replace("<logger>", logger.getName())
+                    .replace("<attacker>", attacker == null ? "" : attacker.getName()));
+        }
+    }
+
+    private void runRewardCommandsOnDeath(Player logger, Player attacker, PlayerDeathEvent event) {
+        ItemStack[] before = cloneContents(logger.getInventory().getContents());
+        runRewardCommands(logger, attacker);
+        ItemStack[] after = logger.getInventory().getContents();
+        boolean[] matched = new boolean[before.length];
+
+        for (int slot = 0; slot < after.length; slot++) {
+            ItemStack current = after[slot];
+            if (current == null || current.getType().isAir()) continue;
+
+            int remaining = current.getAmount();
+            for (int previousSlot = 0; previousSlot < before.length && remaining > 0; previousSlot++) {
+                ItemStack previous = before[previousSlot];
+                if (matched[previousSlot] || previous == null || previous.getType().isAir()
+                        || !previous.isSimilar(current)) continue;
+                int used = Math.min(remaining, previous.getAmount());
+                matched[previousSlot] = true;
+                remaining -= used;
+            }
+
+            if (remaining <= 0) continue;
+            ItemStack dropped = current.clone();
+            dropped.setAmount(remaining);
+            event.getDrops().add(dropped);
+            logger.getInventory().setItem(slot, slot < before.length ? before[slot] : null);
+        }
+    }
+
+    private ItemStack[] cloneContents(ItemStack[] contents) {
+        ItemStack[] copy = new ItemStack[contents.length];
+        for (int slot = 0; slot < contents.length; slot++) {
+            copy[slot] = contents[slot] == null ? null : contents[slot].clone();
+        }
+        return copy;
+    }
+
     private boolean hasActiveItemCooldown(UUID playerId, long now) {
         return trident.getOrDefault(playerId, 0L) > now || pearl.getOrDefault(playerId, 0L) > now
                 || windCharge.getOrDefault(playerId, 0L) > now || mace.getOrDefault(playerId, 0L) > now;
     }
 
     private boolean hasActiveCombatPartner(UUID playerId) {
-        if (hasActiveIncomingAttacker(playerId)) return true;
-        Map<UUID, Long> targets = outgoingTargets.get(playerId);
-        if (targets == null) return false;
-        long now = System.currentTimeMillis();
-        targets.values().removeIf(end -> end <= now);
-        if (targets.isEmpty()) {
-            outgoingTargets.remove(playerId);
-            return false;
-        }
-        return true;
+        return hasActivePartner(incomingAttackers, playerId) || hasActivePartner(outgoingTargets, playerId);
     }
 
-    private boolean hasActiveIncomingAttacker(UUID playerId) {
-        Map<UUID, Long> attackers = incomingAttackers.get(playerId);
-        if (attackers == null) return false;
+    private boolean hasActivePartner(Map<UUID, Map<UUID, Long>> relations, UUID playerId) {
+        Map<UUID, Long> partners = relations.get(playerId);
+        if (partners == null) return false;
         long now = System.currentTimeMillis();
-        attackers.values().removeIf(end -> end <= now);
-        if (attackers.isEmpty()) {
-            incomingAttackers.remove(playerId);
+        partners.values().removeIf(end -> end <= now);
+        if (partners.isEmpty()) {
+            relations.remove(playerId);
             return false;
         }
         return true;
